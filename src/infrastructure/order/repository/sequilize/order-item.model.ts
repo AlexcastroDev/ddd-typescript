@@ -1,14 +1,14 @@
 import {
-  Table,
-  Model,
-  PrimaryKey,
+  AutoIncrement,
+  BelongsTo,
   Column,
   ForeignKey,
-  BelongsTo,
+  Model,
+  PrimaryKey,
+  Table,
 } from "sequelize-typescript";
 import ProductModel from "../../../product/repository/sequelize/product.model";
 import OrderModel from "./order.model";
-
 
 @Table({
   tableName: "order_items",
@@ -16,8 +16,9 @@ import OrderModel from "./order.model";
 })
 export default class OrderItemModel extends Model {
   @PrimaryKey
+  @AutoIncrement
   @Column
-  declare id: string;
+  declare id: number;
 
   @ForeignKey(() => ProductModel)
   @Column({ allowNull: false })
