@@ -69,7 +69,6 @@ export default class OrderRepository implements OrderRepositoryInterface {
         customer_id: entity.customerId,
         total: entity.total(),
         items: entity.items.map((item) => ({
-          id: item.id,
           name: item.name,
           price: item.price,
           product_id: item.productId,
