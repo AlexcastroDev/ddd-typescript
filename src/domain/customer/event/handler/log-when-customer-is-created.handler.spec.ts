@@ -1,17 +1,17 @@
-import LogWhenCustomerIsCreatedHandler from "./log-when-customer-is-created.handler";
 import EventDispatcher from "../../../@shared/event/event-dispatcher";
 import CustomerCreatedEvent from "../customer-created.event";
+import SendAnotherConsoleAfterCreateHandler from "./send-console-after-create-2.handler";
+import SendConsoleAfterCreateHandler from "./send-console-after-create.handler";
 
 describe("LogWhenCustomerIsCreatedHandler", () => {
-  let handler: LogWhenCustomerIsCreatedHandler;
   let dispatcher: EventDispatcher;
 
   beforeEach(() => {
-    handler = new LogWhenCustomerIsCreatedHandler();
     dispatcher = new EventDispatcher();
   });
 
   it("should log when a customer is created", () => {
+    const handler = new SendConsoleAfterCreateHandler();
     dispatcher.register(CustomerCreatedEvent.event, handler);
 
     expect(
@@ -28,21 +28,20 @@ describe("LogWhenCustomerIsCreatedHandler", () => {
   });
 
   it("should log when a customer is created", () => {
-    dispatcher.register(CustomerCreatedEvent.event, handler);
-    jest.spyOn(console, "log");
+    const handler1 = new SendConsoleAfterCreateHandler();
+    const handler2 = new SendAnotherConsoleAfterCreateHandler();
 
-    const customerCreatedEvent1 = new CustomerCreatedEvent("primeiro");
-    const customerCreatedEvent2 = new CustomerCreatedEvent("segundo");
+    dispatcher.register(CustomerCreatedEvent.event, handler1);
+    dispatcher.register(CustomerCreatedEvent.event, handler2);
 
-    dispatcher.notify(customerCreatedEvent1);
-    dispatcher.notify(customerCreatedEvent2);
+    const spySendEvent = jest.spyOn(handler1, "handle");
+    const spySendAnother = jest.spyOn(handler2, "handle");
 
-    expect(console.log).toBeCalledTimes(2);
-    expect(console.log).toBeCalledWith(
-      "Esse é o primeiro console.log do evento: CustomerCreated",
-    );
-    expect(console.log).toBeCalledWith(
-      "Esse é o primeiro console.log do evento: CustomerCreated",
-    );
+    const customerCreatedEvent = new CustomerCreatedEvent();
+
+    dispatcher.notify(customerCreatedEvent);
+
+    expect(spySendEvent).toHaveBeenCalledTimes(1);
+    expect(spySendAnother).toHaveBeenCalledTimes(1);
   });
 });

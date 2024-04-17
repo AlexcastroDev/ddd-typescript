@@ -3,10 +3,10 @@ import EventInterface from "../../@shared/event/event.interface";
 export default class CustomerCreatedEvent implements EventInterface {
   static event = "CustomerCreatedEvent";
   dataTimeOccurred: Date;
-  eventData: string;
+  eventData: any;
 
-  constructor(eventData: string) {
+  constructor() {
     this.dataTimeOccurred = new Date();
-    this.eventData = eventData;
+    this.eventData = {};
   }
 }
