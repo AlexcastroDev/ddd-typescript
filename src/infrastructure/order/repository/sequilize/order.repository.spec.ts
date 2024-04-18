@@ -210,5 +210,140 @@ describe("Order repository test", () => {
         ),
       ),
     );
+
+    const updatedOrder = await OrderModel.findOne({
+      where: { id: order.id },
+      include: ["items"],
+    });
+
+    expect(updatedOrder.toJSON()).toStrictEqual({
+      id: "123",
+      customer_id: "123",
+      total: 30,
+      items: [
+        {
+          id: 1,
+          name: orderItem.name,
+          price: orderItem.price,
+          quantity: 3,
+          order_id: "123",
+          product_id: "123",
+        },
+      ],
+    });
+  });
+
+  it("should update an order with one more item", async () => {
+    const orderItem = new OrderItem(
+      null,
+      product.name,
+      product.price,
+      product.id,
+      2,
+    );
+
+    const order = new Order("123", "123", [orderItem]);
+
+    await orderRepository.create(order);
+
+    const orderModel = await OrderModel.findOne({
+      where: { id: order.id },
+      include: ["items"],
+    });
+
+    orderModel.items[0].quantity = 3;
+
+    const orderItem2 = new OrderItem(
+      null,
+      product.name,
+      product.price,
+      product.id,
+      2,
+    );
+
+    await orderRepository.update(
+      new Order(
+        orderModel.id,
+        orderModel.customer_id,
+        orderModel.items.map((item) =>
+          new OrderItem(
+            item.id,
+            item.name,
+            item.price,
+            item.product_id,
+            item.quantity,
+          )
+        ).concat(orderItem2),
+      ),
+    );
+
+    const updatedOrder = await OrderModel.findOne({
+      where: { id: order.id },
+      include: ["items"],
+    });
+
+    expect(updatedOrder.toJSON()).toStrictEqual({
+      id: "123",
+      customer_id: "123",
+      total: 50,
+      items: [
+        {
+          id: 1,
+          name: orderItem.name,
+          price: orderItem.price,
+          quantity: 3,
+          order_id: "123",
+          product_id: "123",
+        },
+        {
+          id: 2,
+          name: orderItem2.name,
+          price: orderItem2.price,
+          quantity: orderItem2.quantity,
+          order_id: "123",
+          product_id: "123",
+        },
+      ],
+    });
+  });
+
+  it("should update and remove item", async () => {
+    const orderItems = new Array(6).fill(
+      new OrderItem(null, product.name, product.price, product.id, 2),
+    );
+
+    const order = new Order("123", "123", orderItems);
+
+    await orderRepository.create(order);
+
+    const orderModel = await OrderModel.findOne({
+      where: { id: order.id },
+      include: ["items"],
+    });
+
+    await orderRepository.update(
+      new Order(
+        orderModel.id,
+        orderModel.customer_id,
+        orderModel.items
+          .map((item) =>
+            new OrderItem(
+              item.id,
+              item.name,
+              item.price,
+              item.product_id,
+              item.quantity,
+            )
+          )
+          .filter((item) => item.id !== 3),
+      ),
+    );
+
+    const updatedOrder = await OrderModel.findOne({
+      where: { id: order.id },
+      include: ["items"],
+    });
+
+    expect(updatedOrder.items.length).toBe(5);
   });
 });
